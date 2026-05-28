@@ -1,0 +1,28 @@
+{
+  "name": "fynnmagchips",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fiebigfynnleon-dev/FynnMagChips.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/fiebigfynnleon-dev/FynnMagChips/issues"
+  },
+  "homepage": "https://github.com/fiebigfynnleon-dev/FynnMagChips#readme",
+  "dependencies": {
+    "@twurple/api": "^8.1.4",
+    "@twurple/auth": "^8.1.4",
+    "discord.js": "^14.26.4",
+    "dotenv": "^17.4.2",
+    "rss-parser": "^3.13.0"
+  }
+}
