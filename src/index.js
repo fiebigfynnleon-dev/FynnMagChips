@@ -1,7 +1,8 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, Collection, REST, Routes, Events, ActivityType } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, REST, Routes, Events, ActivityType, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const os = require('os'); // Für System-Infos
 
 const client = new Client({
     intents: [
@@ -29,7 +30,7 @@ if (fs.existsSync(commandsPath)) {
     }
 }
 
-// Events laden (WICHTIG: Hier wird die interactionCreate.js geladen)
+// Events laden
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 for (const file of eventFiles) {
@@ -42,6 +43,50 @@ for (const file of eventFiles) {
 client.once(Events.ClientReady, async () => {
     console.log(`✅ ${client.user.tag} ist online!`);
     client.user.setActivity('FynnMagChips', { type: ActivityType.Watching });
+
+    // --- STATUS-MONITOR LOGIK ---
+    const channelId = '1478547111175000127';
+    const channel = await client.channels.fetch(channelId).catch(() => null);
+
+    if (channel) {
+        const createEmbed = () => {
+            const now = new Date();
+            const mem = process.memoryUsage().heapUsed / 1024 / 1024;
+            const cpuModel = os.cpus()[0].model;
+            const cpuCount = os.cpus().length;
+            const totalMemGB = (os.totalmem() / 1024 / 1024 / 1024).toFixed(1);
+            const timeString = now.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            return new EmbedBuilder()
+                .setTitle('🤖 Bot-Status')
+                .setColor('#9900ff')
+                .addFields(
+                    { name: '⏳ Letzte Aktualisierung', value: `<t:${Math.floor(now.getTime() / 1000)}:R>`, inline: true },
+                    { name: '💾 RAM-Verbrauch (Bot)', value: `${mem.toFixed(2)} MB`, inline: true },
+                    { name: '🖥️ CPU Modell', value: `${cpuModel}`, inline: false },
+                    { name: '⚙️ CPU Kerne', value: `${cpuCount}`, inline: true },
+                    { name: '💾 Gesamtspeicher', value: `${totalMemGB} GB`, inline: true },
+                    { name: '🕒 Uhrzeit', value: `\`${timeString}\``, inline: true }
+                )
+                .setFooter({ text: 'Status wird jede Minute aktualisiert' })
+                .setTimestamp();
+        };
+
+        // Nachricht senden oder aktualisieren
+        const messages = await channel.messages.fetch({ limit: 1 });
+        let statusMsg = messages.first();
+        if (!statusMsg || statusMsg.author.id !== client.user.id) {
+            statusMsg = await channel.send({ embeds: [createEmbed()] });
+        } else {
+            await statusMsg.edit({ embeds: [createEmbed()] });
+        }
+
+        // Alle 60 Sekunden aktualisieren
+        setInterval(async () => {
+            try { await statusMsg.edit({ embeds: [createEmbed()] }); } catch (e) { console.error(e); }
+        }, 60000);
+    }
+    // --- ENDE STATUS-MONITOR ---
 
     const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
     try {
