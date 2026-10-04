@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { setStatus } = require('./statusServer');
 const { Client, GatewayIntentBits, Collection, REST, Routes, Events, ActivityType, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
@@ -42,6 +43,9 @@ for (const file of eventFiles) {
 
 client.once(Events.ClientReady, async () => {
     console.log(`✅ ${client.user.tag} ist online!`);
+    setStatus('status', 'online');
+    setStatus('botTag', client.user.tag);
+    setStatus('guildCount', client.guilds.cache.size);
     client.user.setActivity('FynnMagChips', { type: ActivityType.Watching });
 
     // --- STATUS-MONITOR LOGIK ---
@@ -95,4 +99,8 @@ client.once(Events.ClientReady, async () => {
     } catch (e) { console.error(e); }
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.DISCORD_TOKEN).catch(err => {
+    console.error('❌ Discord-Login fehlgeschlagen:', err.message);
+    setStatus('status', 'error');
+    setStatus('lastError', err.message);
+});

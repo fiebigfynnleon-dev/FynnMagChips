@@ -1,0 +1,25 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/health",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "DISCORD_TOKEN",
+      "description": "Discord bot token from the Discord Developer Portal (Bot → Reset Token). Required for the bot to connect to Discord.",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    },
+    {
+      "name": "TWITCH_CLIENT_ID",
+      "description": "Twitch API client ID from the Twitch Developer Console. Used by socialMonitor.js to check live streams.",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    },
+    {
+      "name": "TWITCH_CLIENT_SECRET",
+      "description": "Twitch API client secret from the Twitch Developer Console. Used by socialMonitor.js to check live streams.",
+      "requiredAtBoot": true,
+      "generatedForDevelopment": true
+    }
+  ]
+}
